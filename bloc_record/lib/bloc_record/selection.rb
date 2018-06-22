@@ -3,8 +3,8 @@ require 'sqlite3'
 module Selection
     def find(id)
         row = connection.get_first_row <<-SQL
-            SELECT
-            WHERE id = 
+            SELECT #{columns.join ","} FROM #{table}
+            WHERE id = #{id};
         SQL
 
         data = Hash[columns.zip(row)]

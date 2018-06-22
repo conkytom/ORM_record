@@ -1,11 +1,13 @@
 require 'bloc_record/utility'
 require 'bloc_record/schema'
+require 'bloc_record/selection'
 require 'bloc_record/persistence'
 require 'bloc_record/connection'
  
 module BlocRecord
    class Base
      include Persistence
+     extend Selection
      extend Schema
      extend Connection
 

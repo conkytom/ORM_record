@@ -1,0 +1,59 @@
+-What's a RubyGem and why would you use one?
+
+A RubyGem is a packet of software that can be added to a Ruby application.  These gems add a module, library, or some sort of functionality to the ruby app.  Gems can be inrcredibly powerful tools that can potentially make coding in Ruby much easier by providing many helpful functions, or establishing a solid framework for a larger application.
+
+-What's the difference between lazy and eager loading?
+
+Lazy loading is a design pattern in which `@schema` is not calculated until the first time that it is called.  Eager loading on the other hand will calculate `@schema` as soon as the model object is initialized.
+
+-What's the difference between the CREATE TABLE and INSERT INTO SQL statements?
+
+`CREATE TABLE` does exactly as it commands, it creates a table.  The developer uses this command and gives the table a name, attribute columns, and data tyoes for those columns, and SQL will create a table with those specifications.
+
+`INSERT INTO` is used to insert values into an already existing table.  
+
+-What's the difference between extend and include? When would you use one or the other?
+
+`extend` is used to add class methods, and `include` is used to add instance methods from a module.  Class methods are actions that can be preformed by or on a whole class, while instance methods can only be used on an instance in a class.  Functions like sort, or find are more geared towards class methods as they would tyipally use all objects within that class as the functions pool of data.  While functions like edit, or delete are more likely to be used as instance methods to edit or delete individual instances within a class.  Otherwise you may accidentally delete the entire class.
+
+-In persistence.rb, why do the save methods need to be instance (vs. class) methods?
+
+We want to use an instance method in this scenario becuase we want to be able to pinpoint what we are saving.  When the save methods run the SQL portion of their code this will be pointed at one or many instances, but it is unlikely that it should be applied to the entire class everytime it is used.  I beleive if it was used as a class method it would overwrite all the information in the class with the given data, as opposed to updating just the instances that we want changed.
+
+-Given the Jar-Jar Binks example earlier, what is the final SQL query in persistence.rb's save! method?
+
+```
+UPDATE character
+SET character_name = 'Jar-Jar Binks', star_rating = 1
+WHERE id = 1
+```
+
+-AddressBook's entries instance variable no longer returns anything. We'll fix this in a later checkpoint. What changes will we need to make?
+
+address_book.rb does not contain any method(s) to find and/or return an existing entry.  This can be solved by adding a method like `find_by` which could use the included binary search to return the values of a given entry.
+
+-Write a Ruby method that converts snake_case to CamelCase using regular expressions.
+
+```
+string = "snake_case_testing_words".gsub(/::/, '/')
+#=> snake_case_testing_words
+string.gsub!(/^./) { |str| str.upcase }
+#=> Snake_case_testing_words
+string.gsub!(/_./) { |str| str.upcase }
+#=> Snake_Case_Testing_Words
+string.gsub!(/_/,'')
+#=> SnakeCaseTestingWords
+```
+
+-Add a select method which takes an attribute and value and searches for all records that match:
+
+```
+def find_by(attribute, value)
+
+    connection.execute <<-SQL
+        SELECT *
+        FROM #{table}
+        WHERE #{attribute} = #{value}; 
+    SQL
+end
+```
