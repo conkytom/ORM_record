@@ -107,12 +107,20 @@ module Selection
     end
 
     def order(*args)
-        if args.count > 1
-            order = args.join(",")
-        else
-            order = args.first.to_s
+        order_array = []
+        args.each do |arg|
+            case arg
+            when String
+                order_array << arg
+            when Symbol
+                order_array << arg.to_s
+            when Hash
+                order_array << arg.map{ | key, value | "#{key} #{value}" }
+            end
         end
 
+        order = order_array.join(",")
+        
         rows = connection.execute <<-SQL
             SELECT * FROM #{table}
             ORDER BY #{order};
@@ -133,10 +141,17 @@ module Selection
                     SELECT * FROM #{table} #{BlocRecord::Utility.sql_strings(args.first)};
                 SQL
             when Symbol
-            
                 rows = connection.execute <<-SQL
                     SELECT * FROM #{table}
                     INNER JOIN #{args.first} ON #{args.first}.#{table}_id = #{table}.id
+                SQL
+            when Hash
+                key = args.first.keys.first
+                value = args.first[key]
+                rows = connection.execute <<-SQL
+                    SELECT * FROM #{table}
+                    INNER JOIN #{key} ON #{key}.#{table}_id = #{table}.id
+                    INNER JOIN #{value} ON #{value}.#{key}_id = #{key}.id
                 SQL
             end
         end
