@@ -143,7 +143,7 @@ module Selection
 
         rows_to_array(rows)
     end
-
+    
     private
     def init_object_from_row(row)
         if row

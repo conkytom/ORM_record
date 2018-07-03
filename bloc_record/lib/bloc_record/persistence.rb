@@ -53,27 +53,45 @@ module Persistence
         end
         
         def update(ids, updates)
-            updates = BlocRecord::Utility.convert_keys(updates)
-            updates.delete "id"
-            updates_array = updates.map { |key, value| "#{key}=#{BlocRecord::Utility.sql_strings(value)}" }
-            
-            if ids.class == Fixnum
-                where_clause = "WHERE id = #{ids};"
-            elsif ids.class == Array
-                where_clause = id.empty? ? ";" : "WHERE id IN (#{ids.join(",")};"
+            if updates.is_a? Array
+                ids.each_with_index do |id, index|
+                    update(id, updates[index])
+                end
             else
-                where_clause = ";"
-            end
+                updates = BlocRecord::Utility.convert_keys(updates)
+                updates.delete "id"
+                updates_array = updates.map { |key, value| "#{key}=#{BlocRecord::Utility.sql_strings(value)}" }
+                
+                if ids.class == Fixnum
+                    where_clause = "WHERE id = #{ids};"
+                elsif ids.class == Array
+                    where_clause = id.empty? ? ";" : "WHERE id IN (#{ids.join(",")};"
+                else
+                    where_clause = ";"
+                end
 
-            connection.execute <<-SQL
-                UPDATE #{table}
-                SET #{updates_array * ","} #{where_clause}
-            SQL
-            true
+                connection.execute <<-SQL
+                    UPDATE #{table}
+                    SET #{updates_array * ","} #{where_clause}
+                SQL
+                true
+            end
         end
 
         def update_all(updates)
             update(nil, updates)
+        end
+        
+        method_missing(m, *args, &block)
+        if m[0..6] = "update_"
+            attribute = m[7...m.length]
+            if self.class.columns.include?(attribute)
+                self.class.update_attribute(attribute, args[0])
+            else
+                puts  " '#{attribute}' is not properly defined column that can be updated."
+            end
+        else
+            puts  " '.#{m}' is not properly defined method.  Please try something else."
         end
     end
 end
